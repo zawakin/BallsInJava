@@ -60,11 +60,11 @@ public class Main extends Application{
 	private static boolean genB, genR;
 	
 	public static MainWindow mw;
-	private static Point2D mouse;
+	private static Point mouse;
 	private static LinkedList<KeyCode> key1, key2;
 	
 	public static Player player;
-	private static LinkedList<Ball> ball;
+	public static LinkedList<Ball> ball;
 	private static LinkedList<Figure> figure;
 	
 	public static int nowStage;
@@ -82,30 +82,32 @@ public class Main extends Application{
 		stage.setMinHeight(700);
 		
 		VBox root = new VBox();
+		Scene scene = new Scene(root);
 		
 		mw = new MainWindow(800, 512);
 		root.getChildren().add(mw);
 		
-		mouse = Point2D.ZERO;
+		mouse = new Point(0.0, 0.0);
 		key1 = new LinkedList<KeyCode>();
 		key2 = new LinkedList<KeyCode>();
-		mw.setOnMouseMoved(event -> mouse = new Point2D(event.getSceneX(), event.getSceneY()));
+		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMousePressed(event -> {
-			
+			System.out.println("$");
 		});
 		mw.setOnMouseReleased(event -> {
 			
 		});
-		mw.setOnKeyPressed(event -> {
+		scene.setOnKeyPressed(event -> {
 			KeyCode code = event.getCode();
-			if(key1.indexOf(code) != -1) key1.add(code);
+//			System.out.println("#"+key1.indexOf(code)+code.getName());
+			if(key1.indexOf(code) == -1) key1.add(code);
 			run = !(code == KeyCode.ESCAPE);
 		});
-		mw.setOnKeyReleased(event -> key1.remove(event.getCode()));
-		
-		player = new Player(new Point(mw.getWidth()/2, mw.getHeight()/2-15.0), new Point(), 15.0, ColorType.GREEN);
+		scene.setOnKeyReleased(event -> key1.remove(event.getCode()));
+
 		ball = new LinkedList<Ball>();
 		figure = new LinkedList<Figure>();
+		player = new Player(new Point(mw.getWidth()/2, mw.getHeight()/2-15.0), new Point(), 15.0, ColorType.GREEN);
 		
 		nowStage = 0;
 		
@@ -123,9 +125,9 @@ public class Main extends Application{
 			}
 		};
 		timer = new Timer();
-		timer.schedule(timerTask, 0, 1000);
+		timer.schedule(timerTask, 0, dt);
 		
-		stage.setScene(new Scene(root));
+		stage.setScene(scene);
 		stage.show();
 
 	}
@@ -144,12 +146,12 @@ public class Main extends Application{
 			gc.setStroke(Color.rgb(180, 180, 180, 1.0));
 			gc.strokeRect(0.0, 0.0, getWidth(), getHeight());
 			
-			for(int n = 0; n < figure.size(); n++){
-				figure.get(n).draw(mw);
+			for(int j = 0; j < figure.size(); j++){
+				figure.get(j).draw(mw);
 			}
 			
-			for(int n = 0; n < ball.size(); n++){
-				ball.get(n).draw(mw);
+			for(int i = 0; i < ball.size(); i++){
+				ball.get(i).draw(mw);
 			}
 			
 		}
@@ -158,12 +160,30 @@ public class Main extends Application{
 	public void loop(){
 		if((key1.indexOf(KeyCode.SPACE) != -1) && (key2.indexOf(KeyCode.SPACE) == -1)) paused = !paused;
 		if(!paused){
-			System.out.println("$"+count);
-			count++;
-			// keyControl();
+//			System.out.println("$"+count);
+//			count++;
+			keyControl();
+			for(int i = 0; i < ball.size(); i++){
+				ball.get(i).move();
+			}
+			System.out.println(player.vel.x);
+			for(int i = 0; i < ball.size(); i++){
+				for(int j = 0; j < figure.size(); j++){
+					figure.get(j).collision01(ball.get(i), j);
+				}
+			}
+			/*
+			Point vec = new Point(mouse.x-player.pos.x, -mouse.y+player.pos.y);
+			double dist = player.pos.distance(mouse)-player.size;
+			double rad = Math.atan2(vec.y, vec.x);
+			
+			if(dist >= 380.0) dist = 380.0;
+			*/
 			mw.draw();
 		}
 	}
+	
+	
 	
 	public void keyControl(){
 		double u = player.vel.x, v = player.vel.y;			
@@ -190,7 +210,7 @@ public class Main extends Application{
 			default:
 			}
 		}
-		if((key1.indexOf(KeyCode.A) == -1) && (key2.indexOf(KeyCode.D) == -1)) u*= 0.85;
+		if((key1.indexOf(KeyCode.A) == -1) && (key1.indexOf(KeyCode.D) == -1)) u*= 0.85;
 		player.vel.set(u, v);		
 	}
 }

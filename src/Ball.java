@@ -24,6 +24,13 @@ public class Ball {
 			contact[n] = new Contact();
 		}
 		touchArea = new LinkedList<TouchArea>();
+		final int I = Main.ball.size();
+		for(int i = 0; i < I; i++){
+			Main.ball.get(i).touchArea.add(new TouchArea());
+		}
+		for(int i = 0; i < I+1; i++){
+			touchArea.add(new TouchArea());
+		}
 	}
 	
 	public void draw(Main.MainWindow mw){
@@ -31,17 +38,19 @@ public class Ball {
 		mw.gc.setFill(color.toGc());
 		mw.gc.fillOval(pos.x, pos.y, size, size);
 	}
-	
-	public void fall(){
-		vel.y -= 0.2;
-	}
-	
+		
 	public void move(){
-		final double u = Math.max(Math.min(vel.x, maxVel), -maxVel);
-		final double v = Math.max(Math.min(vel.y, maxVel), -maxVel);
-		vel.set(u, v);
-		pos.x += u;
-		pos.y -= v;
+		vel.y -= 0.2;
+		
+		
+		
+		
+		vel.x = Math.max(Math.min(vel.x, maxVel), -maxVel);
+		vel.y = Math.max(Math.min(vel.y, maxVel), -maxVel);
+		pos.x += vel.x;
+		pos.y -= vel.y;
+		
+		collisionC = 0;
 	}
 	
 	public void adjustPos(Ball b){
