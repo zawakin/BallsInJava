@@ -16,6 +16,7 @@ import javafx.event.EventHandler;
 import javafx.geometry.Orientation;
 import javafx.geometry.Point2D;
 import javafx.scene.Scene;
+import javafx.scene.Cursor;
 import javafx.scene.image.Image;
 import javafx.scene.image.WritableImage;
 import javafx.scene.SnapshotParameters;
@@ -32,6 +33,8 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.Alert;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.KeyCombination;
 import javafx.scene.input.KeyCode;
@@ -48,8 +51,6 @@ import javafx.stage.Stage;
 
 public class Main extends Application{
 
-	public static int count = 0;
-	
 	public static final int dt = 1000/60;
 	private static TimerTask timerTask;
 	private static Timer timer;
@@ -62,7 +63,7 @@ public class Main extends Application{
 	private static boolean testF = false;
 	
 	public static MainWindow mw;
-	private static Point mouse;
+	private static Mouse mouse;
 	private static LinkedList<KeyCode> key1, key2;
 	
 	public static Player player;
@@ -88,21 +89,40 @@ public class Main extends Application{
 		Scene scene = new Scene(root);
 		
 		mw = new MainWindow(800, 512);
+		mw.setCursor(Cursor.NONE);
 		root.getChildren().add(mw);
 		
-		mouse = new Point(0.0, 0.0);
+		mouse = new Mouse();
 		key1 = new LinkedList<KeyCode>();
 		key2 = new LinkedList<KeyCode>();
 		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
+		mw.setOnMouseDragged(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMousePressed(event -> {
 			System.out.println("$");
+			final MouseButton button = event.getButton();
+			if(button == MouseButton.PRIMARY){
+				if(!mouse.prepR){
+					mouse.prepL = true;
+				}else{
+					mouse.prepR = false;
+				}
+			}
+			if(button == MouseButton.SECONDARY){
+				if(!mouse.prepL){
+					mouse.prepR = true;
+				}else{
+					mouse.prepL = false;					
+				}
+			}
 		});
 		mw.setOnMouseReleased(event -> {
-			
+			System.out.println("#");
+			final MouseButton button = event.getButton();
+			if(button == MouseButton.PRIMARY) mouse.shootL = true;
+			if(button == MouseButton.SECONDARY) mouse.shootR = true;
 		});
 		scene.setOnKeyPressed(event -> {
-			KeyCode code = event.getCode();
-//			System.out.println("#"+key1.indexOf(code)+code.getName());
+			final KeyCode code = event.getCode();
 			if(key1.indexOf(code) == -1) key1.add(code);
 			run = !(code == KeyCode.ESCAPE);
 		});
@@ -157,14 +177,13 @@ public class Main extends Application{
 				ball.get(i).draw(mw);
 			}
 			
+			mouse.draw(mw);
 		}
 	}
 	
 	public void loop(){
 		if(keyPressed(key1, KeyCode.SPACE) && !keyPressed(key2, KeyCode.SPACE)) paused = !paused;
 		if(!paused){
-//			System.out.println("$"+count);
-//			count++;
 			keyControl();
 			if(genR){
 				ball.add(new Ball(mouse, new Point(), 10.0, ColorType.RED));
@@ -173,6 +192,20 @@ public class Main extends Application{
 			if(genB){
 				ball.add(new Ball(mouse, new Point(), 10.0, ColorType.BLUE));
 				genB = false;
+			}
+			
+			Point vec = new Point(mouse.x-player.pos.x, -mouse.y+player.pos.y);
+			double dist = player.pos.distance(mouse)-player.size;
+			double rad = Math.atan2(vec.y, vec.x);
+			if(dist >= 380.0) dist = 380.0;
+			
+			if(mouse.shootL){
+				if(player.weight > 300.0) player.shoot(dist, rad, ColorType.BLUE);
+				mouse.prepL = mouse.shootL = false;
+			}
+			if(mouse.shootR){
+				if(player.weight > 300.0) player.shoot(dist, rad, ColorType.RED);
+				mouse.prepR = mouse.shootR = false;
 			}
 			
 			for(int i = 0; i < ball.size(); i++){
@@ -198,26 +231,19 @@ public class Main extends Application{
 			for(int i = 0; i < ball.size(); i++){
 				ball.get(i).move();
 			}
-//			System.out.println(player.vel.x);
 			for(int i = 0; i < ball.size(); i++){
 				for(int j = 0; j < figure.size(); j++){
 					figure.get(j).collision01(ball.get(i), j);
 				}
 			}
-			/*
-			Point vec = new Point(mouse.x-player.pos.x, -mouse.y+player.pos.y);
-			double dist = player.pos.distance(mouse)-player.size;
-			double rad = Math.atan2(vec.y, vec.x);
-			
-			if(dist >= 380.0) dist = 380.0;
-			*/
 		}
 		if(keyPressed(key1, KeyCode.W) && !keyPressed(key2, KeyCode.W)) testF = true;
 		for(int i = 0; i < player.collisionC; i++){
 			final double i_rad = (player.contact[i].tangent+2*Math.PI)%(2*Math.PI);
-/*			player.landing = i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI
+			/*
+			player.landing = i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI
 					&& keyPressed(key1, KeyCode.W) && !keyPressed(key2, KeyCode.W);
-*/
+			*/		
 			if(i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI && testF) player.landing = true;
 		}
 		
