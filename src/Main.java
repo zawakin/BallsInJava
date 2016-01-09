@@ -59,6 +59,8 @@ public class Main extends Application{
 	
 	private static boolean genB, genR;
 	
+	private static boolean testF = false;
+	
 	public static MainWindow mw;
 	private static Point mouse;
 	private static LinkedList<KeyCode> key1, key2;
@@ -80,6 +82,7 @@ public class Main extends Application{
 		stage.setHeight(800);
 		stage.setMinWidth(800);
 		stage.setMinHeight(700);
+		stage.setOnCloseRequest(event -> timer.cancel());
 		
 		VBox root = new VBox();
 		Scene scene = new Scene(root);
@@ -146,8 +149,8 @@ public class Main extends Application{
 			gc.setStroke(Color.rgb(180, 180, 180, 1.0));
 			gc.strokeRect(0.0, 0.0, getWidth(), getHeight());
 			
-			for(int j = 0; j < figure.size(); j++){
-				figure.get(j).draw(mw);
+			for(int i = 0; i < figure.size(); i++){
+				figure.get(i).draw(mw);
 			}
 			
 			for(int i = 0; i < ball.size(); i++){
@@ -158,15 +161,44 @@ public class Main extends Application{
 	}
 	
 	public void loop(){
-		if((key1.indexOf(KeyCode.SPACE) != -1) && (key2.indexOf(KeyCode.SPACE) == -1)) paused = !paused;
+		if(keyPressed(key1, KeyCode.SPACE) && !keyPressed(key2, KeyCode.SPACE)) paused = !paused;
 		if(!paused){
 //			System.out.println("$"+count);
 //			count++;
 			keyControl();
+			if(genR){
+				ball.add(new Ball(mouse, new Point(), 10.0, ColorType.RED));
+				genR = false;
+			}
+			if(genB){
+				ball.add(new Ball(mouse, new Point(), 10.0, ColorType.BLUE));
+				genB = false;
+			}
+			
+			for(int i = 0; i < ball.size(); i++){
+				for(int j = i+1; j < ball.size(); j++){
+					if((ball.get(i).pos.distance(ball.get(j).pos) < ball.get(j).size+ball.get(i).size)
+							&& (((ball.get(i).color == ColorType.BLUE && ball.get(j).color == ColorType.RED) || (ball.get(i).color == ColorType.RED && ball.get(j).color == ColorType.BLUE))
+							|| i == 0 && player.size < ball.get(j).size+1.0)){
+						ball.get(j).adjustPos(ball.get(i));
+						ball.get(j).collide(ball.get(i));
+						ball.get(i).ballCollisionF.set(j, true);
+						ball.get(j).ballCollisionF.set(i, true);
+					}
+					else if(ball.get(i).pos.distance(ball.get(j).pos) < ball.get(j).size+ball.get(i).size-2.0
+							&& !((ball.get(i).color == ColorType.BLUE && ball.get(j).color == ColorType.RED) || (ball.get(i).color == ColorType.RED && ball.get(j).color == ColorType.BLUE))){
+						if(i == 0 && player.size < ball.get(j).size+1.0){
+							break;
+						}
+						ball.get(j).absorb(ball.get(i));
+					}
+				}
+			}
+			
 			for(int i = 0; i < ball.size(); i++){
 				ball.get(i).move();
 			}
-			System.out.println(player.vel.x);
+//			System.out.println(player.vel.x);
 			for(int i = 0; i < ball.size(); i++){
 				for(int j = 0; j < figure.size(); j++){
 					figure.get(j).collision01(ball.get(i), j);
@@ -179,21 +211,36 @@ public class Main extends Application{
 			
 			if(dist >= 380.0) dist = 380.0;
 			*/
-			mw.draw();
 		}
+		if(keyPressed(key1, KeyCode.W) && !keyPressed(key2, KeyCode.W)) testF = true;
+		for(int i = 0; i < player.collisionC; i++){
+			final double i_rad = (player.contact[i].tangent+2*Math.PI)%(2*Math.PI);
+/*			player.landing = i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI
+					&& keyPressed(key1, KeyCode.W) && !keyPressed(key2, KeyCode.W);
+*/
+			if(i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI && testF) player.landing = true;
+		}
+		
+		mw.draw();
+		key2 = (LinkedList<KeyCode>)key1.clone();
+
 	}
 	
-	
+	public boolean keyPressed(LinkedList<KeyCode> key, KeyCode code){
+		return key.indexOf(code) != -1;
+	}
 	
 	public void keyControl(){
-		double u = player.vel.x, v = player.vel.y;			
+		double u = player.vel.x, v = player.vel.y;
 		for(int n = 0; n < key1.size(); n++){
 			switch(key1.get(n)){
 			case C:
 				genB = true;
+				genR = false;
 				break;
 			case V:
 				genR = true;
+				genB = false;
 				break;
 			case A:
 				u = Math.max(u-0.3, -4.0);
@@ -205,12 +252,16 @@ public class Main extends Application{
 				u = 0.0;
 				break;
 			case W:
-				v = 7.0;
+				if(player.landing){
+					v = 7.0;
+					player.landing = false;
+					testF = false;
+				}
 				break;
 			default:
 			}
 		}
-		if((key1.indexOf(KeyCode.A) == -1) && (key1.indexOf(KeyCode.D) == -1)) u*= 0.85;
-		player.vel.set(u, v);		
+		if(!keyPressed(key1, KeyCode.A) && !keyPressed(key1, KeyCode.D)) u*= 0.85;
+		player.vel.set(u, v);
 	}
 }

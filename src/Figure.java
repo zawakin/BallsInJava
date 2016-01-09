@@ -112,7 +112,8 @@ public class Figure {
 				
 				b.contact[b.collisionC].x = b.touchArea.get(j).x;
 				b.contact[b.collisionC].y = b.touchArea.get(j).y;
-				b.contact[b.collisionC].tangent = (Double)null;
+				b.contact[b.collisionC].rad = Math.atan2(b.touchArea.get(j).y-b.pos.y, b.touchArea.get(j).x-b.pos.x);
+				b.contact[b.collisionC].tangent = b.contact[b.collisionC].rad+Math.PI/2;
 				b.collisionC++;
 			}
 			else if(b.touchArea.get(j).dist <= b.size*1.5) return;
@@ -122,22 +123,22 @@ public class Figure {
 			if(drop <= b.size){
 				final double velhx = (b.vel.x*Math.cos(b.touchArea.get(j).rad)+b.vel.y*Math.sin(-b.touchArea.get(j).rad))*Math.cos(b.touchArea.get(j).rad);
 				final double velhy = (b.vel.x*Math.cos(b.touchArea.get(j).rad)+b.vel.y*Math.sin(-b.touchArea.get(j).rad))*Math.sin(-b.touchArea.get(j).rad);
-				double velvx = b.vel.x - velhx;
-				double velvy = b.vel.y - velhy;
-				b.contact[b.collisionC].x = b.pos.x - drop*Math.sin(b.touchArea.get(j).rad);
-				b.contact[b.collisionC].y = b.pos.y + drop*Math.cos(b.touchArea.get(j).rad);
-				b.contact[b.collisionC].tangent = b.touchArea.get(j).rad + Math.PI; 
+				double velvx = b.vel.x-velhx;
+				double velvy = b.vel.y-velhy;
+				b.contact[b.collisionC].x = b.pos.x-drop*Math.sin(b.touchArea.get(j).rad);
+				b.contact[b.collisionC].y = b.pos.y+drop*Math.cos(b.touchArea.get(j).rad);
+				b.contact[b.collisionC].tangent = b.touchArea.get(j).rad+Math.PI; 
 				b.collisionC++;
 				
-				final double excess = b.size - drop;
-				b.vel.x += Math.sqrt(2 * 0.3 * e * excess);
-				b.vel.y += Math.sqrt(2 * 0.3 * e * excess);
-				b.pos.x += excess *  Math.sin(b.touchArea.get(j).rad);
-				b.pos.y += excess * -Math.cos(b.touchArea.get(j).rad);
+				final double excess = b.size-drop;
+				b.vel.x += Math.sqrt(2*0.3*e*excess);
+				b.vel.y += Math.sqrt(2*0.3*e*excess);
+				b.pos.x += excess*Math.sin(b.touchArea.get(j).rad);
+				b.pos.y += excess*-Math.cos(b.touchArea.get(j).rad);
 				velvx *= -e;
 				velvy *= -e;
-				b.vel.x = velhx + velvx;
-				b.vel.y = velhy + velvy;
+				b.vel.x = velhx+velvx;
+				b.vel.y = velhy+velvy;
 			}
 			else if(drop <= b.size*1.5) return;
 		}
