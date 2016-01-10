@@ -1,5 +1,7 @@
 import java.util.LinkedList;
 
+import javafx.scene.canvas.GraphicsContext;
+
 public class Ball {
 	public static final double maxVel = 30.0;
 	
@@ -14,8 +16,8 @@ public class Ball {
 	public LinkedList<Boolean> ballCollisionF;
 	
 	Ball(Point pos, Point vel, double size, ColorType color){
-		this.pos = new Point(pos.x, pos.y);
-		this.vel = new Point(vel.x, vel.y);
+		this.pos = pos.copy();
+		this.vel = vel.copy();
 		this.size = size;
 		weight = size*size;
 		this.color = color;
@@ -37,10 +39,10 @@ public class Ball {
 		}
 	}
 	
-	public void draw(Main.MainWindow mw){
+	public void draw(GraphicsContext gc){
 		
-		mw.gc.setFill(color.toGc());
-		mw.gc.fillOval(pos.x-size, pos.y-size, 2*size, 2*size);
+		gc.setFill(color.toGc());
+		gc.fillOval(pos.x-size, pos.y-size, 2*size, 2*size);
 	}
 		
 	public void move(){
@@ -58,21 +60,20 @@ public class Ball {
 	}
 	
 	public void adjustPos(Ball b){
-		double vx = b.pos.x-pos.x;
-		double vy = b.pos.y-pos.y;
-		double dist = Math.sqrt(vx*vx+vy*vy);
+		final Point v = b.pos.minus(pos);
+		final double dist = v.abs();
 		double excess = size+b.size-dist;
 		
 		final double dist1 = (dist*dist+size*size-b.size*b.size)/(2.0*dist);
 		final double dist2 = (dist*dist-size*size+b.size*b.size)/(2.0*dist);
-
-		contact[collisionC].rad = Math.atan2(vy, vx);
+		
+		contact[collisionC].rad = v.arg();
 		contact[collisionC].tangent = contact[collisionC].rad+Math.PI/2;
 		contact[collisionC].excess = size-dist1;
 		contact[collisionC].x = pos.x + Math.cos(contact[collisionC].rad)*dist1;
 		contact[collisionC].y = pos.y + Math.sin(contact[collisionC].rad)*dist1;
 		
-		b.contact[b.collisionC].rad = Math.atan2(vy, vx)+Math.PI;
+		b.contact[b.collisionC].rad = v.arg()+Math.PI;
 		b.contact[b.collisionC].tangent = b.contact[b.collisionC].rad+Math.PI/2;
 		b.contact[b.collisionC].excess = b.size-dist2;
 		b.contact[b.collisionC].x = b.pos.x + Math.cos(b.contact[b.collisionC].rad)*dist2;
@@ -80,61 +81,41 @@ public class Ball {
 		collisionC++;
 		b.collisionC++;
 		
-		vx /= dist;
-		vy /= dist;
-		
+		v.zoom(1/dist);		
 		excess /= size+b.size;
-		pos.x -= vx*excess*b.size;
-		pos.y -= vy*excess*b.size;
-		b.pos.x += vx*excess*size;
-		b.pos.y += vy*excess*size;
+		pos.translate(v.scalar(-excess*b.size));
+		b.pos.translate(v.scalar(excess*size));
 	}
 	
 	public void collide(Ball b){
 		double t;
-		final double vx = (b.pos.x-pos.x);
-		final double vy = -(b.pos.y-pos.y);
+		final Point v = new Point(b.pos.x-pos.x,-b.pos.y+pos.y);
 		
-		t = -(vx*vel.x+vy*vel.y)/(vx*vx+vy*vy);
-		final double arx = vel.x+vx*t;
-		final double ary = vel.y+vy*t;
+		t = -v.dot(vel)/v.norm();
+		final Point ar = vel.plus(v.scalar(t));
 		
-		t = -(-vy*vel.x+vx*vel.y)/(vx*vx+vy*vy);
-		final double amx = vel.x-vy*t;
-		final double amy = vel.y+vx*t;
+		t = -v.left().dot(vel)/v.norm();
+		final Point am = vel.plus(v.left().scalar(t));
 		
-		t = -(vx*b.vel.x+vy*b.vel.y)/(vx*vx+vy*vy);
-		final double brx = b.vel.x+vx*t;
-		final double bry = b.vel.y+vy*t;
+		t = -v.dot(b.vel)/v.norm();
+		final Point br = b.vel.plus(v.scalar(t));
 		
-		t = -(-vy*b.vel.x+vx*b.vel.y)/(vx*vx+vy*vy);
-		final double bmx = b.vel.x-vy*t;
-		final double bmy = b.vel.y+vx*t;
+		t = -v.left().dot(b.vel)/v.norm();
+		final Point bm = b.vel.plus(v.left().scalar(t));
 		
 		final double e = 0.9;
-		final double adx = (weight*amx+b.weight*bmx+bmx*e*b.weight-amx*e*b.weight)/(weight+b.weight);
-		final double bdx = -e*(bmx-amx)+adx;
-		final double ady = (weight*amx+b.weight*bmy+bmy*e*b.weight-amy*e*b.weight)/(weight+b.weight);
-		final double bdy = -e*(bmy-amy)+ady;
+		final Point ad = am.scalar(weight).plus(bm.scalar(b.weight)).plus(bm.scalar(e*b.weight)).minus(am.scalar(e*b.weight)).scalar(1.0/(weight+b.weight));
+		final Point bd = ad.minus(bm.minus(am).scalar(e));
 		
-		vel.x = adx+arx;
-		vel.y = ady+ary;
-		b.vel.x = bdx+brx;
-		b.vel.y = bdy+bry;
+		vel = ad.plus(ar);
+		b.vel = bd.plus(br);
 	}
 	
 	public void absorb(Ball b){
-		System.out.println(1);
-		Point cp = new Point();
-		cp.x = (weight*pos.x+b.weight*b.pos.x)/(weight+b.weight);
-		cp.y = (weight*pos.y+b.weight*b.pos.y)/(weight+b.weight);
-		
-		Point cv = new Point();
-		cv.x = (weight*vel.x+b.weight*b.vel.x)/(weight+b.weight);
-		cv.y = (weight*vel.y+b.weight*b.vel.y)/(weight+b.weight);
-		
-		b.vel.x = cv.x;
-		b.vel.y = cv.y;
+		final Point cp = pos.scalar(weight).plus(b.pos.scalar(b.weight)).scalar(1.0/(weight+b.weight));
+		final Point cv = vel.scalar(weight).plus(b.vel.scalar(b.weight)).scalar(1.0/(weight+b.weight));		
+		b.pos = cp.copy();
+		b.vel = cv.copy();
 		b.weight = b.weight+weight;
 		b.size = Math.sqrt(b.weight);
 		Main.ball.remove(this);

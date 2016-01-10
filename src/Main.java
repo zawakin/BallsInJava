@@ -60,9 +60,7 @@ public class Main extends Application{
 	
 	private static boolean genB, genR;
 	
-	private static boolean testF = false;
-	
-	public static MainWindow mw;
+	private static MainWindow mw;
 	private static Mouse mouse;
 	private static LinkedList<KeyCode> key1, key2;
 	
@@ -95,38 +93,7 @@ public class Main extends Application{
 		mouse = new Mouse();
 		key1 = new LinkedList<KeyCode>();
 		key2 = new LinkedList<KeyCode>();
-		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
-		mw.setOnMouseDragged(event -> mouse.set(event.getSceneX(), event.getSceneY()));
-		mw.setOnMousePressed(event -> {
-			System.out.println("$");
-			final MouseButton button = event.getButton();
-			if(button == MouseButton.PRIMARY){
-				if(!mouse.prepR){
-					mouse.prepL = true;
-				}else{
-					mouse.prepR = false;
-				}
-			}
-			if(button == MouseButton.SECONDARY){
-				if(!mouse.prepL){
-					mouse.prepR = true;
-				}else{
-					mouse.prepL = false;					
-				}
-			}
-		});
-		mw.setOnMouseReleased(event -> {
-			System.out.println("#");
-			final MouseButton button = event.getButton();
-			if(button == MouseButton.PRIMARY) mouse.shootL = true;
-			if(button == MouseButton.SECONDARY) mouse.shootR = true;
-		});
-		scene.setOnKeyPressed(event -> {
-			final KeyCode code = event.getCode();
-			if(key1.indexOf(code) == -1) key1.add(code);
-			run = !(code == KeyCode.ESCAPE);
-		});
-		scene.setOnKeyReleased(event -> key1.remove(event.getCode()));
+	
 
 		ball = new LinkedList<Ball>();
 		figure = new LinkedList<Figure>();
@@ -141,6 +108,42 @@ public class Main extends Application{
 		
 		Field.field00(ball, figure);
 		
+		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
+		mw.setOnMouseDragged(event -> mouse.set(event.getSceneX(), event.getSceneY()));
+		mw.setOnMousePressed(event -> {
+			System.out.println("$");
+			final MouseButton button = event.getButton();
+			if(button == MouseButton.PRIMARY){
+				if(!player.prepR){
+					player.prepL = true;
+				}else{
+					player.prepR = false;
+				}
+			}
+			if(button == MouseButton.SECONDARY){
+				if(!player.prepL){
+					player.prepR = true;
+				}else{
+					player.prepL = false;	
+				}
+			}
+		});
+		mw.setOnMouseReleased(event -> {
+			System.out.println("#");
+			final MouseButton button = event.getButton();
+			if(player.prepL && button == MouseButton.PRIMARY) player.shootL = true;
+			if(player.prepR && button == MouseButton.SECONDARY) player.shootR = true;
+		});
+		scene.setOnKeyPressed(event -> {
+			final KeyCode code = event.getCode();
+			if(key1.indexOf(code) == -1) key1.add(code);
+			run = !(code == KeyCode.ESCAPE);
+			if(code == KeyCode.F5){
+				timer.cancel();
+				start(stage);
+			}
+		});
+		scene.setOnKeyReleased(event -> key1.remove(event.getCode()));
 		timerTask = new TimerTask(){
 			@Override
 			public void run(){
@@ -156,7 +159,7 @@ public class Main extends Application{
 	}
 	
 	public class MainWindow extends Canvas{
-		public GraphicsContext gc;
+		private GraphicsContext gc;
 		
 		MainWindow(double width, double height){
 			super(width, height);
@@ -168,16 +171,13 @@ public class Main extends Application{
 			gc.setLineWidth(4.0);
 			gc.setStroke(Color.rgb(180, 180, 180, 1.0));
 			gc.strokeRect(0.0, 0.0, getWidth(), getHeight());
-			
 			for(int i = 0; i < figure.size(); i++){
-				figure.get(i).draw(mw);
+				figure.get(i).draw(gc);
 			}
-			
 			for(int i = 0; i < ball.size(); i++){
-				ball.get(i).draw(mw);
+				ball.get(i).draw(gc);
 			}
-			
-			mouse.draw(mw);
+			mouse.draw(gc);
 		}
 	}
 	
@@ -193,25 +193,21 @@ public class Main extends Application{
 				ball.add(new Ball(mouse, new Point(), 10.0, ColorType.BLUE));
 				genB = false;
 			}
-			
-			Point vec = new Point(mouse.x-player.pos.x, -mouse.y+player.pos.y);
-			double dist = player.pos.distance(mouse)-player.size;
-			double rad = Math.atan2(vec.y, vec.x);
-			if(dist >= 380.0) dist = 380.0;
-			
-			if(mouse.shootL){
-				if(player.weight > 300.0) player.shoot(dist, rad, ColorType.BLUE);
-				mouse.prepL = mouse.shootL = false;
+						
+			if(player.shootL){
+				if(player.weight > 300.0) player.shoot(ColorType.BLUE);
+				player.prepL = player.shootL = false;
 			}
-			if(mouse.shootR){
-				if(player.weight > 300.0) player.shoot(dist, rad, ColorType.RED);
-				mouse.prepR = mouse.shootR = false;
+			if(player.shootR){
+				if(player.weight > 300.0) player.shoot(ColorType.RED);
+				player.prepR = player.shootR = false;
 			}
 			
 			for(int i = 0; i < ball.size(); i++){
 				for(int j = i+1; j < ball.size(); j++){
 					if((ball.get(i).pos.distance(ball.get(j).pos) < ball.get(j).size+ball.get(i).size)
-							&& (((ball.get(i).color == ColorType.BLUE && ball.get(j).color == ColorType.RED) || (ball.get(i).color == ColorType.RED && ball.get(j).color == ColorType.BLUE))
+							&& (((ball.get(i).color == ColorType.BLUE && ball.get(j).color == ColorType.RED)
+							|| (ball.get(i).color == ColorType.RED && ball.get(j).color == ColorType.BLUE))
 							|| i == 0 && player.size < ball.get(j).size+1.0)){
 						ball.get(j).adjustPos(ball.get(i));
 						ball.get(j).collide(ball.get(i));
@@ -219,10 +215,9 @@ public class Main extends Application{
 						ball.get(j).ballCollisionF.set(i, true);
 					}
 					else if(ball.get(i).pos.distance(ball.get(j).pos) < ball.get(j).size+ball.get(i).size-2.0
-							&& !((ball.get(i).color == ColorType.BLUE && ball.get(j).color == ColorType.RED) || (ball.get(i).color == ColorType.RED && ball.get(j).color == ColorType.BLUE))){
-						if(i == 0 && player.size < ball.get(j).size+1.0){
-							break;
-						}
+							&& !((ball.get(i).color == ColorType.BLUE && ball.get(j).color == ColorType.RED)
+							|| (ball.get(i).color == ColorType.RED && ball.get(j).color == ColorType.BLUE))){
+						if(i == 0 && player.size < ball.get(j).size+1.0) break;
 						ball.get(j).absorb(ball.get(i));
 					}
 				}
@@ -236,20 +231,21 @@ public class Main extends Application{
 					figure.get(j).collision01(ball.get(i), j);
 				}
 			}
+			player.culcToAim(mouse, keyPressed(key1, KeyCode.SHIFT));
 		}
-		if(keyPressed(key1, KeyCode.W) && !keyPressed(key2, KeyCode.W)) testF = true;
+		if(keyPressed(key1, KeyCode.W) && !keyPressed(key2, KeyCode.W)) player.toJump = true;
 		for(int i = 0; i < player.collisionC; i++){
 			final double i_rad = (player.contact[i].tangent+2*Math.PI)%(2*Math.PI);
 			/*
 			player.landing = i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI
 					&& keyPressed(key1, KeyCode.W) && !keyPressed(key2, KeyCode.W);
 			*/		
-			if(i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI && testF) player.landing = true;
+			if(i_rad >= 3/4*Math.PI && i_rad <= 5/4*Math.PI && player.toJump) player.landing = true;
 		}
 		
 		mw.draw();
 		key2 = (LinkedList<KeyCode>)key1.clone();
-
+		
 	}
 	
 	public boolean keyPressed(LinkedList<KeyCode> key, KeyCode code){
@@ -280,8 +276,7 @@ public class Main extends Application{
 			case W:
 				if(player.landing){
 					v = 7.0;
-					player.landing = false;
-					testF = false;
+					player.landing = player.toJump = false;
 				}
 				break;
 			default:

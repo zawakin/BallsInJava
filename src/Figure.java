@@ -1,4 +1,4 @@
-
+import javafx.scene.canvas.GraphicsContext;
 
 public class Figure {
 	public static final double e = 0.6;
@@ -32,11 +32,11 @@ public class Figure {
 		this.color = color;
 	}
 	
-	public void draw(Main.MainWindow mw){
+	public void draw(GraphicsContext gc){
 		final double[] xPoints = {tl_x, tr_x, br_x, bl_x};
 		final double[] yPoints = {tl_y, tr_y, br_y, bl_y};
-		mw.gc.setFill(color.toGc());
-		mw.gc.fillPolygon(xPoints, yPoints, 4);
+		gc.setFill(color.toGc());
+		gc.fillPolygon(xPoints, yPoints, 4);
 	}
 	
 	public void collision01(Ball b, int j){
@@ -127,6 +127,7 @@ public class Figure {
 				double velvy = b.vel.y-velhy;
 				b.contact[b.collisionC].x = b.pos.x-drop*Math.sin(b.touchArea.get(j).rad);
 				b.contact[b.collisionC].y = b.pos.y+drop*Math.cos(b.touchArea.get(j).rad);
+				b.contact[b.collisionC].rad = Math.atan2(b.touchArea.get(j).y-b.pos.y, b.touchArea.get(j).x-b.pos.x);
 				b.contact[b.collisionC].tangent = b.touchArea.get(j).rad+Math.PI; 
 				b.collisionC++;
 				
