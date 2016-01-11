@@ -2,11 +2,12 @@ package mainSystem;
 
 public class Point {
 	public double x, y;
-	Point(double x, double y){
+	
+	public Point(double x, double y){
 		this.x = x;
 		this.y = y;
 	}
-	Point(){
+	public Point(){
 		this(0.0, 0.0);
 	}
 	
@@ -38,7 +39,7 @@ public class Point {
 		y *= a;
 	}
 	
-	public double norm(){
+	public double square(){
 		return x*x+y*y;
 	}
 
