@@ -1,3 +1,4 @@
+package mainSystem;
 import javafx.scene.paint.Color;
 
 public enum ColorType{

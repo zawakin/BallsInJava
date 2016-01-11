@@ -1,3 +1,4 @@
+package mainSystem;
 
 public class Point {
 	public double x, y;
@@ -56,6 +57,10 @@ public class Point {
 	public Point left(){
 		return new Point(-y, x);
 	}
+
+	public Point right(){
+		return new Point(y, -x);
+	}
 	
 	public Point inv(){
 		return new Point(-x, -y);
@@ -75,5 +80,9 @@ public class Point {
 	
 	public double dot(Point p){
 		return x*p.x+y*p.y;
+	}
+	
+	public double cross(Point p){
+		return x*p.y-y*p.x;
 	}
 }

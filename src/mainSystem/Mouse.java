@@ -1,3 +1,4 @@
+package mainSystem;
 import javafx.scene.canvas.GraphicsContext;
 
 public class Mouse extends Point{

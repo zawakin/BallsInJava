@@ -1,4 +1,6 @@
-import javafx.geometry.Point2D;
+package mainSystem;
+import java.util.LinkedList;
+
 import javafx.scene.canvas.GraphicsContext;
 
 public class Player extends Ball{
@@ -8,8 +10,8 @@ public class Player extends Ball{
 	private Point toAim;
 	private double dist, rad;
 	
-	Player(Point pos, Point vel, double size, ColorType color){
-		super(pos, vel, size, color);
+	Player(LinkedList<Ball> ball, LinkedList<Figure> figure, Point pos, Point vel, double size, ColorType color){
+		super(ball, figure, pos, vel, size, color);
 		landing = toJump = false;
 		prepR = prepL = false;
 		shootR = shootL = false;
@@ -49,9 +51,9 @@ public class Player extends Ball{
 		if(dist >= 380.0) dist = 380.0;
 	}
 	
-	public void shoot(ColorType color){
+	public void shoot(LinkedList<Ball> ball, LinkedList<Figure> figure, ColorType color){
 		final double ns = 13.0;
-		Main.ball.add(new Ball(pos.plus(Point.polar(size+ns, -rad)), Point.polar(dist/25, rad), ns, color));
+		ball.add(new Ball(ball, figure, pos.plus(Point.polar(size+ns, -rad)), Point.polar(dist/25, rad), ns, color));
 		weight -= ns*ns;
 		size = Math.sqrt(weight);
 	}

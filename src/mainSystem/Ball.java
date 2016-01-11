@@ -1,3 +1,4 @@
+package mainSystem;
 import java.util.LinkedList;
 
 import javafx.scene.canvas.GraphicsContext;
@@ -15,7 +16,7 @@ public class Ball {
 	public LinkedList<TouchArea> touchArea;
 	public LinkedList<Boolean> ballCollisionF;
 	
-	Ball(Point pos, Point vel, double size, ColorType color){
+	Ball(LinkedList<Ball> ball, LinkedList<Figure> figure, Point pos, Point vel, double size, ColorType color){
 		this.pos = pos.copy();
 		this.vel = vel.copy();
 		this.size = size;
@@ -28,14 +29,16 @@ public class Ball {
 		}
 		touchArea = new LinkedList<TouchArea>();
 		ballCollisionF = new LinkedList<Boolean>();
-		final int I = Main.ball.size();
+		final int I = ball.size();
+		final int J = figure.size();
 		for(int i = 0; i < I; i++){
-			Main.ball.get(i).touchArea.add(new TouchArea());
-			Main.ball.get(i).ballCollisionF.add(false);
+			ball.get(i).ballCollisionF.add(false);
 		}
 		for(int i = 0; i < I+1; i++){
-			touchArea.add(new TouchArea());
 			ballCollisionF.add(false);
+		}
+		for(int j = 0; j < J; j++){
+			touchArea.add(new TouchArea());
 		}
 	}
 	
@@ -45,7 +48,7 @@ public class Ball {
 		gc.fillOval(pos.x-size, pos.y-size, 2*size, 2*size);
 	}
 		
-	public void move(){
+	public void move(LinkedList<Ball> ball){
 		vel.y -= 0.2;
 		
 		
@@ -57,31 +60,32 @@ public class Ball {
 		pos.y -= vel.y;
 		
 		collisionC = 0;
+		if(pos.y > 2.0*Main.height){
+			System.out.println("&");
+			ball.remove(this);
+		}
 	}
 	
 	public void adjustPos(Ball b){
 		final Point v = b.pos.minus(pos);
 		final double dist = v.abs();
 		double excess = size+b.size-dist;
-		
 		final double dist1 = (dist*dist+size*size-b.size*b.size)/(2.0*dist);
 		final double dist2 = (dist*dist-size*size+b.size*b.size)/(2.0*dist);
 		
 		contact[collisionC].rad = v.arg();
 		contact[collisionC].tangent = contact[collisionC].rad+Math.PI/2;
 		contact[collisionC].excess = size-dist1;
-		contact[collisionC].x = pos.x + Math.cos(contact[collisionC].rad)*dist1;
-		contact[collisionC].y = pos.y + Math.sin(contact[collisionC].rad)*dist1;
+		contact[collisionC].p = pos.plus(Point.polar(dist1, contact[collisionC].rad));
 		
 		b.contact[b.collisionC].rad = v.arg()+Math.PI;
 		b.contact[b.collisionC].tangent = b.contact[b.collisionC].rad+Math.PI/2;
 		b.contact[b.collisionC].excess = b.size-dist2;
-		b.contact[b.collisionC].x = b.pos.x + Math.cos(b.contact[b.collisionC].rad)*dist2;
-		b.contact[b.collisionC].y = b.pos.y + Math.sin(b.contact[b.collisionC].rad)*dist2;
+		b.contact[b.collisionC].p = b.pos.plus(Point.polar(dist2, b.contact[b.collisionC].rad));
 		collisionC++;
 		b.collisionC++;
 		
-		v.zoom(1/dist);		
+		v.zoom(1.0/dist);		
 		excess /= size+b.size;
 		pos.translate(v.scalar(-excess*b.size));
 		b.pos.translate(v.scalar(excess*size));
@@ -111,13 +115,13 @@ public class Ball {
 		b.vel = bd.plus(br);
 	}
 	
-	public void absorb(Ball b){
+	public void absorb(LinkedList<Ball> ball, Ball b){
 		final Point cp = pos.scalar(weight).plus(b.pos.scalar(b.weight)).scalar(1.0/(weight+b.weight));
 		final Point cv = vel.scalar(weight).plus(b.vel.scalar(b.weight)).scalar(1.0/(weight+b.weight));		
 		b.pos = cp.copy();
 		b.vel = cv.copy();
 		b.weight = b.weight+weight;
 		b.size = Math.sqrt(b.weight);
-		Main.ball.remove(this);
+		ball.remove(this);
 	}
 }

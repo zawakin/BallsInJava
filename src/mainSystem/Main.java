@@ -1,3 +1,4 @@
+package mainSystem;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
@@ -51,7 +52,11 @@ import javafx.stage.Stage;
 
 public class Main extends Application{
 
+	public static final double width = 800.0;
+	public static final double height = 512.0;
+	
 	public static final int dt = 1000/60;
+	
 	private static TimerTask timerTask;
 	private static Timer timer;
 	
@@ -65,7 +70,7 @@ public class Main extends Application{
 	private static LinkedList<KeyCode> key1, key2;
 	
 	public static Player player;
-	public static LinkedList<Ball> ball;
+	private static LinkedList<Ball> ball;
 	private static LinkedList<Figure> figure;
 	
 	public static int nowStage;
@@ -86,7 +91,7 @@ public class Main extends Application{
 		VBox root = new VBox();
 		Scene scene = new Scene(root);
 		
-		mw = new MainWindow(800, 512);
+		mw = new MainWindow(width, height);
 		mw.setCursor(Cursor.NONE);
 		root.getChildren().add(mw);
 		
@@ -97,7 +102,7 @@ public class Main extends Application{
 
 		ball = new LinkedList<Ball>();
 		figure = new LinkedList<Figure>();
-		player = new Player(new Point(mw.getWidth()/2, mw.getHeight()/2-15.0), new Point(), 15.0, ColorType.GREEN);
+		player = new Player(ball, figure, new Point(mw.getWidth()/2, mw.getHeight()/2-15.0), new Point(), 15.0, ColorType.GREEN);
 		
 		nowStage = 0;
 		
@@ -106,7 +111,7 @@ public class Main extends Application{
 		
 		genB = genR = false;
 		
-		Field.field00(ball, figure);
+		Field.field01(ball, figure);
 		
 		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMouseDragged(event -> mouse.set(event.getSceneX(), event.getSceneY()));
@@ -186,20 +191,20 @@ public class Main extends Application{
 		if(!paused){
 			keyControl();
 			if(genR){
-				ball.add(new Ball(mouse, new Point(), 10.0, ColorType.RED));
+				ball.add(new Ball(ball, figure, mouse, new Point(), 10.0, ColorType.RED));
 				genR = false;
 			}
 			if(genB){
-				ball.add(new Ball(mouse, new Point(), 10.0, ColorType.BLUE));
+				ball.add(new Ball(ball, figure, mouse, new Point(), 10.0, ColorType.BLUE));
 				genB = false;
 			}
 						
 			if(player.shootL){
-				if(player.weight > 300.0) player.shoot(ColorType.BLUE);
+				if(player.weight > 300.0) player.shoot(ball, figure, ColorType.BLUE);
 				player.prepL = player.shootL = false;
 			}
 			if(player.shootR){
-				if(player.weight > 300.0) player.shoot(ColorType.RED);
+				if(player.weight > 300.0) player.shoot(ball, figure, ColorType.RED);
 				player.prepR = player.shootR = false;
 			}
 			
@@ -218,16 +223,17 @@ public class Main extends Application{
 							&& !((ball.get(i).color == ColorType.BLUE && ball.get(j).color == ColorType.RED)
 							|| (ball.get(i).color == ColorType.RED && ball.get(j).color == ColorType.BLUE))){
 						if(i == 0 && player.size < ball.get(j).size+1.0) break;
-						ball.get(j).absorb(ball.get(i));
+						ball.get(j).absorb(ball, ball.get(i));
 					}
 				}
 			}
 			
 			for(int i = 0; i < ball.size(); i++){
-				ball.get(i).move();
+				ball.get(i).move(ball);
 			}
 			for(int i = 0; i < ball.size(); i++){
 				for(int j = 0; j < figure.size(); j++){
+					if(ball.get(i).color == figure.get(j).color) continue;
 					figure.get(j).collision01(ball.get(i), j);
 				}
 			}
