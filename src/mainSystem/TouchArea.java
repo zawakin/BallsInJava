@@ -5,7 +5,7 @@ public class TouchArea{
 	public double dist, rad;
 	public int num;
 
-	TouchArea(){
+	public TouchArea(){
 		p = new Point();
 		dist = 0.0;
 		rad = 0.0;
