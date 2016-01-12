@@ -79,7 +79,7 @@ public class Figure {
     	kind = kindnum.intValue();
     }
     public mainSystem.Figure getMainFigure(LinkedList<mainSystem.Ball> ball){
-    	return new mainSystem.Figure(ball, 
+    	return new mainSystem.Parallelogram(ball, 
     			new Point(pos.x,pos.y), 
     			width, height, angle, angle2, getColorType());
     }
