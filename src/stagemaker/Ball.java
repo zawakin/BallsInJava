@@ -1,16 +1,17 @@
 package stagemaker;
 
 import javafx.scene.paint.*;
+import mainSystem.Point;
 import javafx.scene.canvas.*;
 
 public class Ball extends Figure{
     protected double x,y,r,vx,vy;
+    protected Point pos,vel;
+    
     public Ball(double x,double y, double r,double vx,double vy,int kind){
         super(x,y,r,r,0,0,kind);
-        this.x = x;
-        this.y = y;
-        this.vx = vx;
-        this.vy = vy;
+        this.pos = new Point(x,y);
+        this.vel = new Point(vx,vy);
         this.r = r;
         this.kind = kind;
     }
@@ -34,7 +35,7 @@ public class Ball extends Figure{
                 gc.setFill(Color.GRAY);
                 break;
         }
-        gc.fillOval(x-r,y-r,2*r,2*r);
+        gc.fillOval(pos.x-r,pos.y-r,2*r,2*r);
         gc.setFill(Color.BLACK);
     }
 

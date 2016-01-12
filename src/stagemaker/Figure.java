@@ -3,11 +3,13 @@ package stagemaker;
 import javafx.beans.property.StringProperty;
 import javafx.geometry.*;
 import javafx.scene.canvas.GraphicsContext;
+
+import java.io.Serializable;
 import java.util.LinkedList;
 import mainSystem.Point;
 import mainSystem.ColorType;
 
-public class Figure {
+public class Figure{
     protected Point pos;
     protected double width,height,angle,angle2;
     protected int kind;
@@ -51,7 +53,7 @@ public class Figure {
     }
     @Override
     public String toString(){
-        return pos.x+","+pos.y+","+width+","+height+","+angle+","+angle2+","+kind;
+        return name + " " + pos.x + " " + pos.y + " " + width + " " + height + " " + angle + " " + angle2 + " " + kind;
     }
     public String getGaneCode(){
         return pos.x+","+pos.y+","+width+","+height+","+angle+","+angle2+","+kind;
