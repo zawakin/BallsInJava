@@ -233,8 +233,7 @@ public class Ball {
 			power.y += contact[j].excess*contact[j].excess*-Math.sin(contact[j].rad);
 			contact[j].excess = size-pos.distance(contact[j].p);
 		}
-		pos.x += power.x/size*2;
-		pos.y += power.y/size*2;
+		pos.translate(power.scalar(1.0/size*2));
 		
 		for(int j = 0; j < collisionC+collisionCC; j++){
 			for(int k = collisionC+collisionCC-1; k > j; k--){
@@ -294,24 +293,22 @@ public class Ball {
 		final double dist = this.dot[i].p.distance(b.pos);
 		if(dist < b.size){
 			contact[collisionC+collisionCC].excess = (b.size-dist)*size/(b.size+size);
-			contact[collisionC+collisionCC].p.x = b.pos.x+(b.size-b.contact[b.collisionC+b.collisionCC].excess)* Math.cos(rad + Math.PI);
-			contact[collisionC+collisionCC].p.y = b.pos.y+(b.size-b.contact[b.collisionC+b.collisionCC].excess)* Math.sin(rad + Math.PI);
+			contact[collisionC+collisionCC].p = b.pos.plus(Point.polar(b.size-b.contact[b.collisionC+b.collisionCC].excess, rad+Math.PI));
 			contact[collisionC+collisionCC].rad = dot[i].rad;
 			contact[collisionC+collisionCC].tangent = dot[i].rad+ Math.PI/2;
 			
 			b.contact[b.collisionC+b.collisionCC].excess = (b.size-dist)*b.size/(b.size+size);
-			b.contact[b.collisionC+b.collisionCC].p.x = contact[collisionC+collisionCC].p.x;
-			b.contact[b.collisionC+b.collisionCC].p.y = contact[collisionC+collisionCC].p.y;
-			b.contact[b.collisionC+b.collisionCC].rad = Math.atan2(b.contact[b.collisionC+b.collisionCC].p.y-b.pos.y, b.contact[b.collisionC+b.collisionCC].p.x- b.pos.x);
-			b.contact[b.collisionC+b.collisionCC].tangent = b.contact[b.collisionC+b.collisionCC].rad+ Math.PI/2;
+			b.contact[b.collisionC+b.collisionCC].p = contact[collisionC+collisionCC].p.copy();
+			b.contact[b.collisionC+b.collisionCC].rad = b.contact[b.collisionC+b.collisionCC].p.minus(b.pos).arg();
+			b.contact[b.collisionC+b.collisionCC].tangent = b.contact[b.collisionC+b.collisionCC].rad+Math.PI/2;
 			collisionCC++;
 			b.collisionCC++;
 		}
 	}
 
 	public void collision02(Ball b){
-		final double rad01 = Math.atan2(b.pos.y-pos.y, b.pos.x-pos.x);
-		int i = (int)(Math.round(rad01*dot.length/Math.PI/2)+dot.length)%dot.length;
+		final double rad1 = b.pos.minus(pos).arg();
+		int i = (int)(Math.round(rad1*dot.length/Math.PI/2)+dot.length)%dot.length;
 		if(dot[(i+1)%dot.length].p.distance(b.pos) < dot[i].p.distance(b.pos)){
 			i++;
 			if(i >= dot.length) i = 0;
@@ -326,8 +323,8 @@ public class Ball {
 				if(i <= 0) i = dot.length-1;
 			}
 		}
-		final double rad02 = Math.atan2(pos.y- b.pos.y, pos.x-b.pos.x);
-		int j = (int)(Math.round(rad02*b.dot.length/Math.PI/2)+b.dot.length)%b.dot.length;
+		final double rad2 = pos.minus(b.pos).arg();
+		int j = (int)(Math.round(rad2*b.dot.length/Math.PI/2)+b.dot.length)%b.dot.length;
 		if(b.dot[(j+1)%b.dot.length].p.distance(pos) < b.dot[j].p.distance(pos)){
 			j++;
 			if(j >= b.dot.length) j = 0;
@@ -342,28 +339,26 @@ public class Ball {
 				if(j <= 0) j= b.dot.length-1;
 			}
 		}
-		final double len01 = dot[i].p.distance(pos);
-		final double len02 = b.dot[j].p.distance(b.pos);
-		final double excess = (len01+ len02)-pos.distance(b.pos);
+		final double dist1 = dot[i].p.distance(pos);
+		final double dist2 = b.dot[j].p.distance(b.pos);
+		final double excess = (dist1+dist2)-pos.distance(b.pos);
 		if(excess > 0){
 			contact[collisionC+collisionCC].excess = excess*size/(b.size+size);
-			contact[collisionC+collisionCC].p.x = pos.x + (len01-contact[collisionC+collisionCC].excess)* Math.cos(dot[i].rad);
-			contact[collisionC+collisionCC].p.y = pos.y + (len01-contact[collisionC+collisionCC].excess)* Math.sin(dot[i].rad);
+			contact[collisionC+collisionCC].p = pos.plus(Point.polar(dist1-contact[collisionC+collisionCC].excess, dot[i].rad));
 			contact[collisionC+collisionCC].rad = dot[i].rad;
 			contact[collisionC+collisionCC].tangent = dot[i].rad+Math.PI/2;
 			
-			b.contact[b.collisionC+b.collisionCC].excess = excess* b.size/(b.size+size);
-			b.contact[b.collisionC+b.collisionCC].p.x = b.pos.x + (len02- b.contact[b.collisionC+b.collisionCC].excess)* Math.cos(b.dot[j].rad);
-			b.contact[b.collisionC+b.collisionCC].p.y = b.pos.y + (len02- b.contact[b.collisionC+b.collisionCC].excess)* Math.sin(b.dot[j].rad);
+			b.contact[b.collisionC+b.collisionCC].excess = excess*b.size/(b.size+size);
+			b.contact[b.collisionC+b.collisionCC].p = b.pos.plus(Point.polar(dist2-b.contact[b.collisionC+b.collisionCC].excess, b.dot[j].rad));
 			b.contact[b.collisionC+b.collisionCC].rad = b.dot[j].rad;
-			b.contact[b.collisionC+b.collisionCC].tangent = b.dot[j].rad+ Math.PI/2;
+			b.contact[b.collisionC+b.collisionCC].tangent = b.dot[j].rad+Math.PI/2;
 			collisionCC++;
 			b.collisionCC++;
 		}
 	}
 	
 	public void absorption01(LinkedList<Ball> ball, Ball b){
-		final double rad = Math.atan2(b.pos.y-pos.y, b.pos.x-pos.x);
+		final double rad = b.pos.minus(pos).arg();
 		int i = (int)(Math.round(rad*dot.length/Math.PI/2)+dot.length)%dot.length;
 		if(dot[(i+1)%b.dot.length].p.distance(b.pos) < dot[i].p.distance(b.pos)){
 			i++;
@@ -381,20 +376,11 @@ public class Ball {
 		}
 		final double len = dot[i].p.distance(b.pos);
 		if(len < b.size*0.95){
-			Point cp = new Point();
-			cp.x = (weight*pos.x+b.weight*b.pos.x)/(weight+b.weight);
-			cp.y = (weight*pos.y+b.weight*b.pos.y)/(weight+b.weight);
-
-			Point cv = new Point();
-			cv.x = (weight*vel.x+b.weight*b.vel.x)/(weight+b.weight);
-			cv.y = (weight*vel.y+b.weight*b.vel.y)/(weight+b.weight);
-
-			b.collisionC  = 0;
-			b.collisionCC = 0;
-			pos.x = cp.x;
-			pos.y = cp.y;
-			vel.x = cv.x;
-			vel.y = cv.y;
+			final Point cp = pos.scalar(weight).plus(b.pos.scalar(b.weight)).scalar(1.0/(weight+b.weight));
+			final Point cv = vel.scalar(weight).plus(b.vel.scalar(b.weight)).scalar(1.0/(weight+b.weight));
+			b.collisionC  = b.collisionCC = 0;
+			pos = cp.copy();
+			vel = cv.copy();
 			weight = b.weight+weight;
 			size = Math.sqrt(weight);
 			ball.remove(b);
@@ -402,8 +388,8 @@ public class Ball {
 	}
 	
 	public void absorption02(LinkedList<Ball> ball, Ball b){
-		final double rad01 = Math.atan2(b.pos.y-pos.y, b.pos.x-pos.x);
-		int i = (int)(Math.round(rad01*dot.length/Math.PI/2)+dot.length)%dot.length;
+		final double rad1 = b.pos.minus(pos).arg();
+		int i = (int)(Math.round(rad1*dot.length/Math.PI/2)+dot.length)%dot.length;
 		if(dot[(i+1)%dot.length].p.distance(b.pos) < dot[i].p.distance(b.pos)){
 			i++;
 			if(i >= dot.length) i = 0;
@@ -418,8 +404,8 @@ public class Ball {
 				if(i <= 0) i = dot.length-1;
 			}
 		}
-		final double rad02 = Math.atan2(pos.y-b.pos.y, pos.x-b.pos.x);
-		int j = (int)(Math.round(rad02*b.dot.length/Math.PI/2)+b.dot.length)%b.dot.length;
+		final double rad2 = pos.minus(b.pos).arg();
+		int j = (int)(Math.round(rad2*b.dot.length/Math.PI/2)+b.dot.length)%b.dot.length;
 		if(b.dot[(j+1)%b.dot.length].p.distance(pos) < b.dot[j].p.distance(pos)){
 			j++;
 			if(j >= b.dot.length) j = 0;
@@ -434,23 +420,14 @@ public class Ball {
 				if(j <= 0) j= b.dot.length-1;
 			}
 		}
-		final double len01 = dot[i].p.distance(pos);
-		final double len02 = b.dot[j].p.distance(b.pos);
-		if(pos.distance(b.pos)*1.05 < len01+len02){
-			Point cp = new Point();
-			cp.x = (weight*pos.x+b.weight*b.pos.x)/(weight+b.weight);
-			cp.y = (weight*pos.y+b.weight*b.pos.y)/(weight+b.weight);
-			
-			Point cv = new Point();
-			cv.x = (weight*vel.x+b.weight*b.vel.x)/(weight+b.weight);
-			cv.y = (weight*vel.y+b.weight*b.vel.y)/(weight+b.weight);
-			
-			b.collisionC  = 0;
-			b.collisionCC = 0;
-			pos.x = cp.x;
-			pos.y = cp.y;
-			vel.x = cv.x;
-			vel.y = cv.y;
+		final double dist1 = dot[i].p.distance(pos);
+		final double dist2 = b.dot[j].p.distance(b.pos);
+		if(pos.distance(b.pos)*1.05 < dist1+dist2){
+			final Point cp = pos.scalar(weight).plus(b.pos.scalar(b.weight)).scalar(1.0/(weight+b.weight));
+			final Point cv = vel.scalar(weight).plus(b.vel.scalar(b.weight)).scalar(1.0/(weight+b.weight));		
+			b.collisionC = b.collisionCC = 0;
+			pos = cp.copy();
+			vel = cv.copy();
 			weight = b.weight+weight;
 			size = Math.sqrt(weight);
 			ball.remove(b);
@@ -460,7 +437,7 @@ public class Ball {
 	public void distort(LinkedList<Ball> ball, LinkedList<Figure> figure){
 		int excessC = 0;
 		for(int j = 0; j < collisionC; j++){
-			contact[j].rad = Math.atan2(contact[j].p.y-prevPos.y, contact[j].p.x-prevPos.x);
+			contact[j].rad = contact[j].p.minus(prevPos).arg();
 			contact[j].excess = size-prevPos.distance(contact[j].p);
 //			if(contact[j].tangent == "NaN") contact[j].tangent = contact[j].rad+Math.PI/2;
 			if(contact[j].excess >= size*0.25) excessC++;
@@ -476,8 +453,7 @@ public class Ball {
 			}
 		}
 		if(collisionC >= 2){
-			pos.x = prevPos.x;
-			pos.y = prevPos.y;
+			pos = prevPos.copy();
 			if(collisionC >= 3){
 				double max1, max2;
 				int num1 = 0, num2 = 0;
@@ -535,8 +511,7 @@ public class Ball {
 					power.x += contact[j].excess*contact[j].excess*-Math.cos(contact[j].tangent-Math.PI/2);
 					power.y += contact[j].excess*contact[j].excess*-Math.sin(contact[j].tangent-Math.PI/2);
 				}
-				pos.x += power.x/size;
-				pos.y += power.y/size;
+				pos.translate(power.scalar(1.0/size));
 				
 				for(int j = 0; j < collisionC; j++){
 					bezier[j].arc1 = 4.0/3*size*size/(size-contact[j].excess)*Math.tan(rad_gap[j]/4);
@@ -568,7 +543,7 @@ public class Ball {
 				}
 				distorted = true;
 				for(int j = 0; j < dot.length; j++){
-					dot[j].rad = Math.atan2(dot[j].p.y-pos.y, dot[j].p.x-pos.x);
+					dot[j].rad = dot[j].p.minus(pos).arg();
 				}
 			}
 		}

@@ -133,19 +133,18 @@ public class Figure {
 	
 	public void collision02(Ball b, int j){
 		if(b.touchArea.get(j).num < 2){
-			final double rad = Math.atan2(b.touchArea.get(j).p.y-b.pos.y, b.touchArea.get(j).p.x-b.pos.x);
+			final double rad = b.touchArea.get(j).p.minus(b.pos).arg();
 			int i;
 			for(i = 0; i < b.dot.length; i++){
 				if((rad+2*Math.PI)%(2*Math.PI) < (b.dot[i].rad+2*Math.PI-b.dot[0].rad)%(2*Math.PI)) break;
 			}
 			if(i >= b.dot.length) i = 0;
 			final double t = (rad-b.dot[(i+b.dot.length-1)%b.dot.length].rad)/(b.dot[i].rad-b.dot[(i+b.dot.length-1)%b.dot.length].rad);
-			final double tangent1 = Math.atan2(b.dot[i].p.y-b.dot[(i+b.dot.length-2)%b.dot.length].p.y, b.dot[i].p.x-b.dot[(i+b.dot.length-2)%b.dot.length].p.x); 
-			final double tangent2 = Math.atan2(b.dot[(i+1)%b.dot.length].p.y-b.dot[(i+b.dot.length-1)%b.dot.length].p.y, b.dot[(i+1)%b.dot.length].p.x- b.dot[(i+b.dot.length-1)%b.dot.length].p.x); 
-			final double excess = (b.dot[(i+b.dot.length-1)%b.dot.length].p.x-b.dot[i].p.x)*(b.touchArea.get(j).p.y-b.dot[i].p.y)- (b.touchArea.get(j).p.x-b.dot[i].p.x)*(b.dot[(i+b.dot.length-1)%b.dot.length].p.y-b.dot[i].p.y);
-			if(excess < 0){
-				b.contact[b.collisionC+b.collisionCC].p.x = b.touchArea.get(j).p.x;
-				b.contact[b.collisionC+b.collisionCC].p.y = b.touchArea.get(j).p.y;
+			final double tangent1 = b.dot[i].p.minus(b.dot[(i+b.dot.length-2)%b.dot.length].p).arg(); 
+			final double tangent2 = b.dot[(i+1)%b.dot.length].p.minus(b.dot[(i+b.dot.length-1)%b.dot.length].p).arg(); 
+			final double excess = b.dot[(i+b.dot.length-1)%b.dot.length].p.minus(b.dot[i].p).cross(b.touchArea.get(j).p.minus(b.dot[i].p));
+			if(excess < 0){				
+				b.contact[b.collisionC+b.collisionCC].p = b.touchArea.get(j).p.copy();
 				b.contact[b.collisionC+b.collisionCC].rad = rad;
 				b.contact[b.collisionC+b.collisionCC].tangent = (1-t)*tangent1+t*tangent2;
 				b.contact[b.collisionC+b.collisionCC].excess = -excess;
@@ -156,25 +155,26 @@ public class Figure {
 		else if(b.touchArea.get(j).num < 3){
 			final double rad = b.touchArea.get(j).rad;
 			int dot_number = (int)(Math.round((rad+Math.PI/2)*b.dot.length/Math.PI/2)+b.dot.length)%b.dot.length;
-			if((b.dot[(dot_number+1)%b.dot.length].p.x-b.pos.x)*Math.cos(rad+ Math.PI/2)+(b.dot[(dot_number+1)%b.dot.length].p.y-b.pos.y)*Math.sin(rad+Math.PI/2) > (b.dot[(dot_number+b.dot.length-1)%b.dot.length].p.x-b.pos.x)*Math.cos(rad+Math.PI/2)+(b.dot[(dot_number+b.dot.length-1)%b.dot.length].p.y-b.pos.y)*Math.sin(rad+Math.PI/2)){
-				while((b.dot[(dot_number+1)%b.dot.length].p.x- b.pos.x)*Math.cos(rad+Math.PI/2)+(b.dot[(dot_number+1)%b.dot.length].p.y-b.pos.y)*Math.sin(rad+Math.PI/2) > (b.dot[dot_number].p.x-b.pos.x)*Math.cos(rad+Math.PI/2)+(b.dot[dot_number].p.y-b.pos.y)*Math.sin(rad+Math.PI/2)){
+			if(b.dot[(dot_number+1)%b.dot.length].p.minus(b.pos).dot(Point.polar(1.0, rad+Math.PI/2))
+				> b.dot[(dot_number+b.dot.length-1)%b.dot.length].p.minus(b.pos).dot(Point.polar(1.0, rad+Math.PI/2))){
+				while(b.dot[(dot_number+1)%b.dot.length].p.minus(b.pos).dot(Point.polar(1.0, rad+Math.PI/2))
+					> (b.dot[dot_number].p.minus(b.pos)).dot(Point.polar(1.0, rad+Math.PI/2))){
 					dot_number++;
 					if(dot_number >= b.dot.length) dot_number = 0;
 				}
-			}
-			else{
-				while((b.dot[(dot_number+b.dot.length-1)%b.dot.length].p.x- b.pos.x)*Math.cos(rad+Math.PI/2)+(b.dot[(dot_number+b.dot.length-1)%b.dot.length].p.y-b.pos.y)*Math.sin(rad+ Math.PI/2) > (b.dot[dot_number].p.x-b.pos.x)* Math.cos(rad+Math.PI/2)+(b.dot[dot_number].p.y-b.pos.y)*Math.sin(rad+Math.PI/2)){
+			}else{
+				while(b.dot[(dot_number+b.dot.length-1)%b.dot.length].p.minus(b.pos).dot(Point.polar(1.0, rad+Math.PI/2))
+						> b.dot[dot_number].p.minus(b.pos).dot(Point.polar(1.0, rad+Math.PI/2))){
 					dot_number--;
 					if(dot_number <= -1) dot_number = b.dot.length-1;
 				}
 			}
-			if(Math.cos(rad)*(b.dot[dot_number].p.y-b.touchArea.get(j).p.y) > Math.sin(rad)*(b.dot[dot_number].p.x-b.touchArea.get(j).p.x)){
-				final double div = Math.sin(rad)*(b.dot[dot_number].p.x-b.pos.x)-Math.cos(rad)*(b.dot[dot_number].p.y-b.pos.y);
-				b.contact[b.collisionC+ b.collisionCC].p.x = ((b.pos.y*b.dot[dot_number].p.x-b.pos.x*b.dot[dot_number].p.y)*Math.cos(rad)-(b.touchArea.get(j).p.y*(b.touchArea.get(j).p.x+Math.cos(rad))-b.touchArea.get(j).p.x*(b.touchArea.get(j).p.y+Math.sin(rad)))*(b.dot[dot_number].p.x-b.pos.x))/div;
-				b.contact[b.collisionC+ b.collisionCC].p.y = ((b.pos.y*b.dot[dot_number].p.x-b.pos.x*b.dot[dot_number].p.y)*Math.sin(rad)-(b.touchArea.get(j).p.y*(b.touchArea.get(j).p.x+Math.cos(rad))-b.touchArea.get(j).p.x*(b.touchArea.get(j).p.y+Math.sin(rad)))*(b.dot[dot_number].p.y-b.pos.y))/div;
-				b.contact[b.collisionC+ b.collisionCC].rad = rad+Math.PI/2; 
-				b.contact[b.collisionC+ b.collisionCC].tangent = rad+Math.PI;
-				b.contact[b.collisionC+ b.collisionCC].excess = Math.cos(rad)*(b.dot[dot_number].p.y-b.contact[b.collisionC+b.collisionCC].p.y)-Math.sin(rad)*(b.dot[dot_number].p.x-b.contact[b.collisionC+b.collisionCC].p.x);
+			if(Point.polar(1.0, rad).cross(b.dot[dot_number].p.minus(b.touchArea.get(j).p)) > 0){
+				final double div = b.dot[dot_number].p.minus(b.pos).cross(Point.polar(1.0, rad));
+				b.contact[b.collisionC+b.collisionCC].p = Point.polar(b.dot[dot_number].p.cross(b.pos), rad).minus(b.dot[dot_number].p.minus(b.pos).scalar(b.touchArea.get(j).p.plus(Point.polar(1.0, rad)).cross(b.touchArea.get(j).p))).scalar(1.0/div);
+				b.contact[b.collisionC+b.collisionCC].rad = rad+Math.PI/2; 
+				b.contact[b.collisionC+b.collisionCC].tangent = rad+Math.PI;
+				b.contact[b.collisionC+b.collisionCC].excess = Point.polar(1.0, rad).cross(b.dot[dot_number].p.minus(b.contact[b.collisionC+b.collisionCC].p));
 				b.collisionCC++;
 			}
 			return;
