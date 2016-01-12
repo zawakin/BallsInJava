@@ -62,14 +62,12 @@ public class Ball {
 	}
 	
 	public void resetLists(LinkedList<Ball> ball, LinkedList<Figure> figure){
-		final int I = ball.size();
-		final int J = figure.size();
 		ballCollisionF.clear();
 		touchArea.clear();
-		for(int i = 0; i < I+1; i++){
+		for(int i = 0; i < ball.size(); i++){
 			ballCollisionF.add(false);
 		}
-		for(int j = 0; j < J; j++){
+		for(int j = 0; j < figure.size(); j++){
 			touchArea.add(new TouchArea());
 		}		
 	}
