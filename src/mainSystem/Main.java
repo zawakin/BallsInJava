@@ -86,8 +86,8 @@ public class Main extends Application{
 	@Override
 	public void start(Stage stage){
 		stage.setTitle("Rubber Ball Puzzle");
-		stage.setWidth(800);
-		stage.setHeight(700);
+		stage.setWidth(900);
+		stage.setHeight(800);
 		stage.setMinWidth(800);
 		stage.setMinHeight(700);
 		stage.setOnCloseRequest(event -> timer.cancel());
@@ -115,13 +115,12 @@ public class Main extends Application{
 		
 		genB = genR = false;
 		
-//		Field.field00(ball, figure);
-//		Field.field01(ball, figure);
-		Field.test00(ball, figure);
+		Field.field01(ball, figure);
 		
 		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMouseDragged(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMousePressed(event -> {
+			System.out.println("$");
 			final MouseButton button = event.getButton();
 			if(button == MouseButton.PRIMARY){
 				if(!player.prepR){
@@ -139,6 +138,7 @@ public class Main extends Application{
 			}
 		});
 		mw.setOnMouseReleased(event -> {
+			System.out.println("#");
 			final MouseButton button = event.getButton();
 			if(player.prepL && button == MouseButton.PRIMARY) player.shootL = true;
 			if(player.prepR && button == MouseButton.SECONDARY) player.shootR = true;
