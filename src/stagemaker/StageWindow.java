@@ -20,15 +20,15 @@ import java.util.LinkedList;
 public class StageWindow extends Stage{
     int width,height;
     GraphicsContext gc;
-    Point2D p0,pf,nowmouse;
+    Point p0,pf,nowmouse;
     private DataStage datastage;
     private MyStage ms1;
     private Stage parent;
     public StageWindow(Stage owner,LinkedList<mainSystem.Ball> ball, LinkedList<mainSystem.Figure> figure){
         width = 800;
         height = 512;
-        setWidth(width);
-        setHeight(height);
+        setWidth(width+100);
+        setHeight(height+100);
         setTitle("StageMaker");
         setX(0);
         parent = owner;
@@ -47,6 +47,12 @@ public class StageWindow extends Stage{
         cvs.setOnKeyPressed(e -> {
             System.out.println(e.getCode().toString());
             int kind = 0;
+			if(e.getCode() == KeyCode.F5){
+				ms1.requestDraw = true;
+				System.out.println("F5");
+				//ms1.SetField(ball, figure);
+				return;
+			}
             switch(e.getCode()){
                 case C:
                     kind = 1;
@@ -65,7 +71,7 @@ public class StageWindow extends Stage{
                 if(kind==0){
                     ms1.setInitPos(nowmouse);
                 }else{
-                    ms1.addBall(new stagemaker.Ball(nowmouse.getX(),nowmouse.getY(),10,kind));
+                    ms1.addBall(new stagemaker.Ball(nowmouse.x,nowmouse.y,10,kind));
                 }
                 gc.clearRect(0,0,width,height);
                 ms1.drawAllFigure(gc);
@@ -73,23 +79,23 @@ public class StageWindow extends Stage{
             }
         });
         cvs.setOnMouseMoved(e -> {
-            nowmouse = new Point2D(e.getX(),e.getY());
+            nowmouse = new Point(e.getX(),e.getY());
         });
         cvs.setOnMousePressed(e -> {
-            p0 = new Point2D(e.getX(),e.getY());
+            p0 = new Point(e.getX(),e.getY());
         });
         cvs.setOnMouseDragged(e -> {
-            pf = new Point2D(e.getX(),e.getY());
+            pf = new Point(e.getX(),e.getY());
             gc.clearRect(0,0,width,height);
             ms1.drawAllFigure(gc);
-            gc.strokeRect(p0.getX(),p0.getY(),pf.getX()-p0.getX(),pf.getY()-p0.getY());
+            gc.strokeRect(p0.x,p0.y,pf.x-p0.x,pf.y-p0.y);
         });
         cvs.setOnMouseReleased(e -> {
-            double w = e.getX() - p0.getX();
-            double h = e.getY() - p0.getY();
+            double w = e.getX() - p0.x;
+            double h = e.getY() - p0.y;
             gc.clearRect(0,0,width,height);
             if(w>0 && h>0){
-                ms1.addFigure(new stagemaker.Figure(p0.getX(),p0.getY(),w,h,3));
+                ms1.addFigure(new stagemaker.Figure(p0.x,p0.y,w,h,3));
                 obslist.removeAll(obslist);
                 for(int i=0;i<ms1.figureList.size();i++){
 	                obslist.add(ms1.figureList.get(i));
@@ -98,21 +104,21 @@ public class StageWindow extends Stage{
             ms1.drawAllFigure(gc);
 //            ms1.printAllFigure();
         });
-		cvs.setOnKeyPressed(event -> {
-			final KeyCode code = event.getCode();
-			if(code == KeyCode.F5){
-				ms1.requestDraw = true;
-				System.out.println("F5");
-				//ms1.SetField(ball, figure);
-			}
-		});
+//		cvs.setOnKeyPressed(event -> {
+//			final KeyCode code = event.getCode();
+//			if(code == KeyCode.F5){
+//				ms1.requestDraw = true;
+//				System.out.println("F5");
+//				//ms1.SetField(ball, figure);
+//			}
+//		});
 
         root.setCursor(Cursor.CROSSHAIR);
         root.getChildren().add(cvs);
         setScene(new Scene(root,0,0));
         show();
 
-
+        ms1.drawAllFigure(gc);
     }
     public MyStage getMyStage(){
     	return ms1;
