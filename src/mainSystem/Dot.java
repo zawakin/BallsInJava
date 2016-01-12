@@ -4,7 +4,7 @@ public class Dot {
 	public Point p;
 	public double rad;
 	
-	Dot(){
+	public Dot(){
 		p = new Point();
 		rad = 0.0;
 	}

@@ -101,8 +101,9 @@ public class StageWindow extends Stage{
 		cvs.setOnKeyPressed(event -> {
 			final KeyCode code = event.getCode();
 			if(code == KeyCode.F5){
-				System.out.println("setfield");
-				ms1.SetField(ball, figure);
+				ms1.requestDraw = true;
+				System.out.println("F5");
+				//ms1.SetField(ball, figure);
 			}
 		});
 
@@ -112,6 +113,9 @@ public class StageWindow extends Stage{
         show();
 
 
+    }
+    public MyStage getMyStage(){
+    	return ms1;
     }
     
     public void drawAllFigure(){

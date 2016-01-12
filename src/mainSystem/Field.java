@@ -24,6 +24,8 @@ public class Field {
 		figure.add(new Figure(ball, new Point(600, 0), 25, 160, 0, 0, ColorType.BLUE));
 		figure.add(new Figure(ball, new Point(720, 200), 30, 50, 0, 0, ColorType.GRAY));
 		figure.add(new Figure(ball, new Point(720, 250), 60, 30, 0, 0, ColorType.GRAY));
+		figure.add(new Figure(ball, new Point(70, 20), 60, 30, 0, 0, ColorType.GRAY));
+		figure.add(new Figure(ball, new Point(170, 20), 60, 30, 0, 0, ColorType.GRAY));
 		figure.add(new Figure(ball, new Point(755, 240), 20, 10, 0, 0, ColorType.RED));
 		Main.nowStage = 1;
 	}

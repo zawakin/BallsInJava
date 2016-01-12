@@ -61,6 +61,19 @@ public class Ball {
 		}
 	}
 	
+	public void resetLists(LinkedList<Ball> ball, LinkedList<Figure> figure){
+		final int I = ball.size();
+		final int J = figure.size();
+		ballCollisionF.clear();
+		touchArea.clear();
+		for(int i = 0; i < I+1; i++){
+			ballCollisionF.add(false);
+		}
+		for(int j = 0; j < J; j++){
+			touchArea.add(new TouchArea());
+		}		
+	}
+	
 	public void draw(GraphicsContext gc){
 		if(collisionC+collisionCC >= 2){
 			if(collisionCC > 0) culcBezier();
@@ -98,8 +111,7 @@ public class Ball {
 			contact[j].p.set(0.0, 0.0);
 		}
 		for(int j = 0; j < dot.length; j++){
-			dot[j].p.x = pos.x+size*Math.cos(j*2*Math.PI/dot.length);
-			dot[j].p.y = pos.y+size*Math.sin(j*2*Math.PI/dot.length);
+			dot[j].p = pos.plus(Point.polar(size, j*2*Math.PI/dot.length));
 		}
 		prevPos = pos.copy();
 		for(int j = 0; j < touchArea.size(); j++){
@@ -229,8 +241,7 @@ public class Ball {
 		Point power = new Point();
 		for(int j = collisionC; j < collisionC+collisionCC; j++){
 			if(contact[j].excess < 0) continue;
-			power.x += contact[j].excess*contact[j].excess*-Math.cos(contact[j].rad);
-			power.y += contact[j].excess*contact[j].excess*-Math.sin(contact[j].rad);
+			power.translate(Point.polar(-contact[j].excess*contact[j].excess, contact[j].rad));
 			contact[j].excess = size-pos.distance(contact[j].p);
 		}
 		pos.translate(power.scalar(1.0/size*2));
@@ -274,7 +285,7 @@ public class Ball {
 	}
 	
 	public void collision01(Ball b){
-		final double rad = Math.atan2(b.pos.y-pos.y, b.pos.x-pos.x);
+		final double rad = b.pos.minus(pos).arg();
 		int i = (int)(Math.round(rad*dot.length/Math.PI/2)+dot.length)%dot.length;
 		if(dot[(i+1)%b.dot.length].p.distance(b.pos) < dot[i].p.distance(b.pos)){
 			i++;
@@ -508,8 +519,7 @@ public class Ball {
 				Point power = new Point();
 				for(int j = 0; j < collisionC; j++){
 					if(contact[j].excess <= 0) continue;
-					power.x += contact[j].excess*contact[j].excess*-Math.cos(contact[j].tangent-Math.PI/2);
-					power.y += contact[j].excess*contact[j].excess*-Math.sin(contact[j].tangent-Math.PI/2);
+					power.translate(Point.polar(-contact[j].excess*contact[j].excess, contact[j].tangent-Math.PI/2));
 				}
 				pos.translate(power.scalar(1.0/size));
 				

@@ -49,7 +49,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.effect.GaussianBlur;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
+import stagemaker.MyStage;
 import stagemaker.StageWindow;
 public class Main extends Application{
 
@@ -76,6 +76,8 @@ public class Main extends Application{
 	
 	public static int nowStage;
 	public StageWindow smw;
+	public MyStage ms;
+	
 	public static boolean requireRedraw = false; 
 	public static void main(String[] args) {
 		Application.launch(args);
@@ -131,7 +133,7 @@ public class Main extends Application{
 				if(!player.prepL){
 					player.prepR = true;
 				}else{
-					player.prepL = false;	
+					player.prepL = false;
 				}
 			}
 		});
@@ -150,6 +152,7 @@ public class Main extends Application{
 				start(stage);
 			}else if(code == KeyCode.F6){
 				smw = new StageWindow(stage,ball,figure);
+				ms = smw.getMyStage();
 			}
 		});
 		scene.setOnKeyReleased(event -> key1.remove(event.getCode()));
@@ -191,7 +194,9 @@ public class Main extends Application{
 	}
 	
 	private void loop(){
-
+		if(ms != null && ms.requestDraw){
+			ms.SetField(ball, figure);
+		}
 		if(keyPressed(key1, KeyCode.SPACE) && !keyPressed(key2, KeyCode.SPACE)) paused = !paused;
 		if(!paused){
 			keyControl();
@@ -239,7 +244,9 @@ public class Main extends Application{
 			if(i_rad >= 3.0/4*Math.PI && i_rad <= 5.0/4*Math.PI && player.toJump) player.landing = true;
 		}
 		key2 = (LinkedList<KeyCode>)key1.clone();
-		
+		for(int i = 0; i < ball.size(); i++){
+			ball.get(i).resetLists(ball, figure);
+		}
 	}
 	
 	public boolean keyPressed(LinkedList<KeyCode> key, KeyCode code){

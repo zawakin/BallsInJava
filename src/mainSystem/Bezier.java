@@ -6,7 +6,7 @@ public class Bezier {
 	public double mid_excess;
 	public double arc1, arc2, arc_mid;
 	
-	Bezier(){
+	public Bezier(){
 		mid = new Point();
 		mid_tan = 0.0;
 		mid_excess = 0.0;

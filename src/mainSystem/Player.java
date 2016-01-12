@@ -10,7 +10,7 @@ public class Player extends Ball{
 	private Point toAim;
 	private double dist, rad;
 	
-	Player(LinkedList<Ball> ball, LinkedList<Figure> figure, Point pos, Point vel, double size, ColorType color){
+	public Player(LinkedList<Ball> ball, LinkedList<Figure> figure, Point pos, Point vel, double size, ColorType color){
 		super(ball, figure, pos, vel, size, color);
 		landing = toJump = false;
 		prepR = prepL = false;

@@ -13,6 +13,7 @@ public class MyStage{
   private ArrayList<Ball> ballList;
   private Ball initBall;
   private boolean initposflag;
+  public boolean requestDraw = false;
   MyStage(int width,int height){
       figureList = new ArrayList<Figure>();
       ballList = new ArrayList<Ball>();
@@ -94,14 +95,15 @@ public class MyStage{
       return s;
   }    
   public void SetField(LinkedList<mainSystem.Ball> ball, LinkedList<mainSystem.Figure> figure){
+		System.out.println("setfield");
 		ball.clear();
 		figure.clear();
-		
+		ball.add(Main.player);
 	      for(int i=0;i<figureList.size();i++){
 	          figure.add(figureList.get(i).getMainFigure(ball));
 	      }
-		ball.add(Main.player);
 //		figure.add(new mainSystem.Figure(ball, new mainSystem.Point(0, 497), 800, 316, 0, 0, ColorType.GRAY));
 		Main.nowStage = 0;
+		requestDraw = false;
   }
 }
