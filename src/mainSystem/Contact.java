@@ -3,7 +3,7 @@ public class Contact{
 	public Point p;
 	public double rad, excess, tangent;
 
-	Contact(){
+	public Contact(){
 		p = new Point();
 		rad = 0.0;
 		excess = 0.0;

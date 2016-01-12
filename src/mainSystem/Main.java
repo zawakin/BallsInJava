@@ -50,6 +50,7 @@ import javafx.scene.effect.GaussianBlur;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import stagemaker.StageWindow;
 public class Main extends Application{
 
 	public static final double width = 800.0;
@@ -74,7 +75,8 @@ public class Main extends Application{
 	private static LinkedList<Figure> figure;
 	
 	public static int nowStage;
-	
+	public StageWindow smw;
+	public static boolean requireRedraw = false; 
 	public static void main(String[] args) {
 		Application.launch(args);
 	}
@@ -146,6 +148,8 @@ public class Main extends Application{
 			if(code == KeyCode.F5){
 				timer.cancel();
 				start(stage);
+			}else if(code == KeyCode.F6){
+				smw = new StageWindow(stage,ball,figure);
 			}
 		});
 		scene.setOnKeyReleased(event -> key1.remove(event.getCode()));
@@ -187,6 +191,7 @@ public class Main extends Application{
 	}
 	
 	private void loop(){
+
 		if(keyPressed(key1, KeyCode.SPACE) && !keyPressed(key2, KeyCode.SPACE)) paused = !paused;
 		if(!paused){
 			keyControl();
