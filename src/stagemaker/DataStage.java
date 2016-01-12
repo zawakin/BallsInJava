@@ -66,17 +66,21 @@ public class DataStage extends Stage{
 		
 		save.setOnAction(event -> {
 			File savefile = filechooser.showSaveDialog(this);
-			ms.save(savefile);
+			if(savefile != null){
+				ms.save(savefile);
+			}
 		});
 		
 		load.setOnAction(event -> {
 			File loadfile = filechooser.showOpenDialog(this);
-			ms.load(loadfile);
-			dataobslist.removeAll(dataobslist);
-			for(int i=0;i<ms.figureList.size();i++){
-				dataobslist.add(ms.figureList.get(i));
+			if(loadfile != null){
+				ms.load(loadfile);
+				dataobslist.removeAll(dataobslist);
+				for(int i=0;i<ms.figureList.size();i++){
+					dataobslist.add(ms.figureList.get(i));
+				}
+				owner.drawAllFigure();
 			}
-			owner.drawAllFigure();
 		});
         
         datatable = new TableView<Figure>();
