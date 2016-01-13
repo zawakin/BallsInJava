@@ -117,7 +117,8 @@ public class Main extends Application{
 		
 //		Field.field00(ball, figure);
 //		Field.field01(ball, figure);
-		Field.test00(ball, figure);
+//		Field.test00(ball, figure);
+		Field.test01(ball, figure);
 		
 		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMouseDragged(event -> mouse.set(event.getSceneX(), event.getSceneY()));
