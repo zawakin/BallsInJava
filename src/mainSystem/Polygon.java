@@ -1,7 +1,5 @@
 package mainSystem;
-
 import java.util.LinkedList;
-
 import javafx.scene.canvas.GraphicsContext;
 
 public class Polygon extends Figure{
@@ -24,6 +22,9 @@ public class Polygon extends Figure{
 			vh[n].zoom(1.0/vh[n].abs());
 			vv[n] = vh[n].right();
 		}
+	}
+	public Polygon(LinkedList<Ball> ball, Point[] p){
+		this(ball, p, ColorType.GRAY);
 	}
 	
 	public void draw(GraphicsContext gc){

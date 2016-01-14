@@ -22,6 +22,14 @@ public class Parallelogram extends Figure{
 		this.rad1 = rad1;
 		this.rad2 = rad2;
 	}
+	public Parallelogram(LinkedList<Ball> ball, Point tl, double wid, double hei, double rad1, double rad2){
+		this(ball, tl, wid, hei, rad1, rad2, ColorType.GRAY);
+	}
+	
+	public Polygon toPolygon(LinkedList<Ball> ball){
+		Point[] p = {bl, tl, tr, br};
+		return new Polygon(ball, p, color);
+	}
 	
 	public void draw(GraphicsContext gc){
 		final double[] xPoints = {tl.x, tr.x, br.x, bl.x};
