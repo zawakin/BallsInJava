@@ -1,14 +1,12 @@
 package mainSystem;
-
 import java.util.LinkedList;
-
 import javafx.scene.canvas.GraphicsContext;
 
 public class Polygon extends Figure{
-	private final int N;
-	private Point[] p;
-	private Point[] vh, vv;
-	private double[] arg;
+	protected int N;
+	protected Point[] p;
+	protected Point[] vh, vv;
+	protected double[] arg;
 	
 	public Polygon(LinkedList<Ball> ball, Point[] p, ColorType color){
 		super(ball, color);
@@ -24,6 +22,9 @@ public class Polygon extends Figure{
 			vh[n].zoom(1.0/vh[n].abs());
 			vv[n] = vh[n].right();
 		}
+	}
+	public Polygon(LinkedList<Ball> ball, Point[] p){
+		this(ball, p, ColorType.GRAY);
 	}
 	
 	public void draw(GraphicsContext gc){
@@ -41,7 +42,7 @@ public class Polygon extends Figure{
 		int n;
 		for(n = 0; n < N; n++){
 			Point d0 = b.pos.minus(p[n]);
-			if(vv[(n-1+N)%N].cross(d0) > 0 && vv[n].cross(d0) < 0){
+			if(vh[(n-1+N)%N].cross(vh[n]) > 0 && vv[(n-1+N)%N].cross(d0) > 0 && vv[n].cross(d0) < 0){
 				b.touchArea.get(j).p = p[n].copy();
 				b.touchArea.get(j).num = 1;
 				System.out.println("$");
@@ -62,7 +63,7 @@ public class Polygon extends Figure{
 					b.touchArea.get(j).rad = arg[n];
 					b.touchArea.get(j).num = 3;
 					System.out.println("#");
-				break;
+					break;
 				}
 			}
 		}

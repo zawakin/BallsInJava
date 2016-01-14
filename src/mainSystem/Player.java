@@ -26,7 +26,7 @@ public class Player extends Ball{
 		if(prepR && size+19.0 < dist) strokeDottedLine(gc, ColorType.RED);
 	}
 	
-	public void culcToAim(Point aim, boolean shifted){
+	public void aim(Point aim, boolean shifted){
 		toAim.set(aim.x-pos.x, -aim.y+pos.y);
 		dist = pos.distance(aim)-size;
 		rad = toAim.arg();

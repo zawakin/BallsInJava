@@ -1,5 +1,4 @@
 package mainSystem;
-
 import java.util.LinkedList;
 import javafx.scene.canvas.GraphicsContext;
 
@@ -13,9 +12,13 @@ public abstract class Figure {
 			ball.get(i).touchArea.add(new TouchArea());
 		}
 	}
+	public Figure(LinkedList<Ball> ball){
+		this(ball, ColorType.GRAY);
+	}
 	
 	public abstract void draw(GraphicsContext gc);
 	public abstract void collision01(Ball b, int j);
+	public void time(){}
 	
 	public void collision02(Ball b, int j){
 		if(b.touchArea.get(j).num < 2){

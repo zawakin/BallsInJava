@@ -61,7 +61,6 @@ public class Main extends Application{
 	private static TimerTask timerTask;
 	private static Timer timer;
 	
-	private static boolean run;
 	private static boolean paused;
 	
 	private static boolean genB, genR;
@@ -77,8 +76,8 @@ public class Main extends Application{
 	public static int nowStage;
 	public StageWindow smw;
 	public MyStage ms;
+	public static boolean requireRedraw = false;
 	
-	public static boolean requireRedraw = false; 
 	public static void main(String[] args) {
 		Application.launch(args);
 	}
@@ -86,11 +85,10 @@ public class Main extends Application{
 	@Override
 	public void start(Stage stage){
 		stage.setTitle("Rubber Ball Puzzle");
-		stage.setWidth(800);
+		stage.setWidth(816);
 		stage.setHeight(700);
-		stage.setMinWidth(800);
+		stage.setMinWidth(816);
 		stage.setMinHeight(700);
-		stage.setOnCloseRequest(event -> timer.cancel());
 		
 		VBox root = new VBox();
 		Scene scene = new Scene(root);
@@ -110,15 +108,20 @@ public class Main extends Application{
 		
 		nowStage = 0;
 		
-		run = true;
 		paused = false;
 		
 		genB = genR = false;
 		
 //		Field.field00(ball, figure);
 //		Field.field01(ball, figure);
-		Field.test00(ball, figure);
+//		Field.test00(ball, figure);
+//		Field.test01(ball, figure);
+		Field.idea00(ball, figure);
 		
+		stage.setOnCloseRequest(event -> {
+			timer.cancel();
+			Platform.exit();
+		});
 		mw.setOnMouseMoved(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMouseDragged(event -> mouse.set(event.getSceneX(), event.getSceneY()));
 		mw.setOnMousePressed(event -> {
@@ -146,12 +149,11 @@ public class Main extends Application{
 		scene.setOnKeyPressed(event -> {
 			final KeyCode code = event.getCode();
 			if(key1.indexOf(code) == -1) key1.add(code);
-			run = !(code == KeyCode.ESCAPE);
 			if(code == KeyCode.F5){
 				timer.cancel();
 				start(stage);
 			}else if(code == KeyCode.F6){
-				smw = new StageWindow(stage,ball,figure);
+				smw = new StageWindow(stage, ball, figure);
 				ms = smw.getMyStage();
 			}
 		});
@@ -180,7 +182,7 @@ public class Main extends Application{
 		
 		public void draw(){
 			gc.clearRect(0.0, 0.0, getWidth(), getHeight());
-			gc.setLineWidth(4.0);
+			gc.setLineWidth(2.0);
 			gc.setStroke(Color.rgb(180, 180, 180, 1.0));
 			gc.strokeRect(0.0, 0.0, getWidth(), getHeight());
 			for(int i = 0; i < figure.size(); i++){
@@ -194,9 +196,7 @@ public class Main extends Application{
 	}
 	
 	private void loop(){
-		if(ms != null && ms.requestDraw){
-			ms.SetField(ball, figure);
-		}
+		if(ms != null && ms.requestDraw) ms.SetField(ball, figure);
 		if(keyPressed(key1, KeyCode.SPACE) && !keyPressed(key2, KeyCode.SPACE)) paused = !paused;
 		if(!paused){
 			keyControl();
@@ -227,7 +227,7 @@ public class Main extends Application{
 					figure.get(j).collision01(ball.get(i), j);
 				}
 			}
-			player.culcToAim(mouse, keyPressed(key1, KeyCode.SHIFT));			
+			player.aim(mouse, keyPressed(key1, KeyCode.SHIFT));			
 		}
 		for(int i = 0; i < ball.size(); i++){
 			ball.get(i).distort(ball, figure);
@@ -244,6 +244,9 @@ public class Main extends Application{
 			if(i_rad >= 3.0/4*Math.PI && i_rad <= 5.0/4*Math.PI && player.toJump) player.landing = true;
 		}
 		key2 = (LinkedList<KeyCode>)key1.clone();
+		for(int i = 0; i < figure.size(); i++){
+			figure.get(i).time();
+		}
 		for(int i = 0; i < ball.size(); i++){
 			ball.get(i).resetLists(ball, figure);
 		}
