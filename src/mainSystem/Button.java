@@ -79,6 +79,7 @@ public abstract class Button extends Polygon{
 	@Override
 	public void collideWithApex(Ball b, Point p){
 		super.collideWithApex(b, p);
+		if(working) return;
 		working = true;
 		work(b);
 	}
@@ -86,6 +87,7 @@ public abstract class Button extends Polygon{
 	@Override
 	public void collideWithSide(Ball b, Point p, double arg){
 		super.collideWithSide(b, p, arg);
+		if(working) return;
 		working = true;
 		work(b);
 	}

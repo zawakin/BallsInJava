@@ -72,5 +72,48 @@ public class Field {
 
 		Main.nowStage = -2;
 	}
+	
+	public static void idea00(LinkedList<Ball> ball, LinkedList<Figure> figure){
+		ball.clear();
+		figure.clear();
+		
+		Main.player.pos.set(100, 430);
+		
+		
+		
+		ball.add(Main.player);
+		figure.add(new Parallelogram(ball, new Point(0, 497), 800, 316, 0, 0));
+		figure.add(new Parallelogram(ball, new Point(-300, -300), 300, 812, 0, 0));
+		figure.add(new Parallelogram(ball, new Point(800, -300), 300, 812, 0, 0));
+
+		figure.add(new Parallelogram(ball, new Point(0, 360), 80, 30, 0, 0, ColorType.RED));
+		Point[] p0 = {
+				new Point(0, 80),
+				new Point(0, 0),
+				new Point(80, 0),
+				};
+		figure.add(new Polygon(ball, p0));
+		figure.add(new Parallelogram(ball, new Point(80, 140), 30, 250, 0, 0));
+		figure.add(new Parallelogram(ball, new Point(110, 140), 30, 160, 0, 0));
+		figure.add(new Parallelogram(ball, new Point(110, 360), 30, 30, 0, 0, ColorType.BLUE));
+		figure.add(new Parallelogram(ball, new Point(140, 360), 90, 30, 0, 0));
+		figure.add(new Parallelogram(ball, new Point(140, 270), 30, 30, 0, 0, ColorType.RED));
+		figure.add(new Parallelogram(ball, new Point(170, 270), 30, 90, 0, 0, ColorType.RED));
+		figure.add(new Parallelogram(ball, new Point(170, 0), 30, 270, 0, 0));
+		Point[] p1 = {
+				new Point(80, 140),
+				new Point(80, 80),
+				new Point(140, 140),
+				};
+		figure.add(new Polygon(ball, p1));
+		figure.add(new Parallelogram(ball, new Point(200, 300), 90, 30, 0, 0));
+		figure.add(new Parallelogram(ball, new Point(260, 330), 30, 60, 0, 0));
+		Parallelogram fig0 = new Parallelogram(ball, new Point(260, 390), 30, 107, 0, 0, ColorType.RED);
+		ColorButton2 cb0 = new ColorButton2(ball, new Point(275, 285), 15);
+		cb0.associate(fig0);
+		figure.add(fig0);
+		figure.add(cb0);
+		Main.nowStage = 10;
+	}
 
 }

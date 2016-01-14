@@ -85,9 +85,9 @@ public class Main extends Application{
 	@Override
 	public void start(Stage stage){
 		stage.setTitle("Rubber Ball Puzzle");
-		stage.setWidth(800);
+		stage.setWidth(816);
 		stage.setHeight(700);
-		stage.setMinWidth(800);
+		stage.setMinWidth(816);
 		stage.setMinHeight(700);
 		
 		VBox root = new VBox();
@@ -115,7 +115,8 @@ public class Main extends Application{
 //		Field.field00(ball, figure);
 //		Field.field01(ball, figure);
 //		Field.test00(ball, figure);
-		Field.test01(ball, figure);
+//		Field.test01(ball, figure);
+		Field.idea00(ball, figure);
 		
 		stage.setOnCloseRequest(event -> {
 			timer.cancel();
@@ -181,7 +182,7 @@ public class Main extends Application{
 		
 		public void draw(){
 			gc.clearRect(0.0, 0.0, getWidth(), getHeight());
-			gc.setLineWidth(4.0);
+			gc.setLineWidth(2.0);
 			gc.setStroke(Color.rgb(180, 180, 180, 1.0));
 			gc.strokeRect(0.0, 0.0, getWidth(), getHeight());
 			for(int i = 0; i < figure.size(); i++){
